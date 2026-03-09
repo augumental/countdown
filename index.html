@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown | Badeye</title>
+    <title>Badeye | Protocol</title>
     <style>
         :root {
-            --bg-dark: #050505;
-            --accent-glow: #1a1a3a;
+            --bg-dark: #020202;
+            --accent-glow: #11112b;
             --discord-blue: #5865F2;
         }
 
@@ -18,85 +18,83 @@
             height: 100%;
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
 
+        /* Pulsing Background */
         .gradient-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, var(--accent-glow) 0%, var(--bg-dark) 70%);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, var(--accent-glow) 0%, var(--bg-dark) 80%);
             z-index: -2;
-            animation: pulse 6s ease-in-out infinite alternate;
+            animation: pulse 8s ease-in-out infinite alternate;
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.6; }
-            100% { transform: scale(1.2); opacity: 1; }
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
         }
 
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            pointer-events: none;
-        }
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; }
 
         .content {
             text-align: center;
             z-index: 10;
-            padding: 40px;
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            padding: 50px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
         }
 
         h1 {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 6px;
-            margin-bottom: 25px;
-            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.3);
         }
 
         #timer {
-            font-size: clamp(3.5rem, 12vw, 7rem);
+            font-size: clamp(3.5rem, 15vw, 8rem);
             font-weight: 900;
-            letter-spacing: -3px;
+            letter-spacing: -4px;
             margin: 0;
             font-variant-numeric: tabular-nums;
-            background: linear-gradient(to bottom, #fff 30%, #666 100%);
+            background: linear-gradient(to bottom, #fff 40%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
         }
 
         #discord-link {
             display: none;
-            font-size: 1.5rem;
-            color: var(--discord-blue);
+            font-size: 1.4rem;
+            color: white;
             text-decoration: none;
             font-weight: bold;
-            padding: 12px 24px;
-            margin-top: 20px;
-            border: 1px solid rgba(88, 101, 242, 0.4);
-            border-radius: 8px;
-            background: rgba(88, 101, 242, 0.05);
-            transition: all 0.3s ease;
+            padding: 14px 28px;
+            margin-top: 25px;
+            border-radius: 12px;
+            background: var(--discord-blue);
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         #discord-link:hover {
-            background: var(--discord-blue);
-            color: white;
-            box-shadow: 0 0 30px rgba(88, 101, 242, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.6);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -106,45 +104,43 @@
     <canvas id="pCanvas"></canvas>
 
     <div class="content">
-        <h1 id="status">Syncing with EST Terminal</h1>
-        <div id="timer">12:00:00</div>
+        <h1 id="status">EST Global Sync Active</h1>
+        <div id="timer">00:00:00</div>
         <a href="https://discord.gg/badeye" id="discord-link">discord.gg/badeye</a>
     </div>
 
     <script>
-        // --- YOUR UNIQUE IDENTIFIER ---
+        // THE HIDDEN TEXT
         console.log("RXo2SYKUCZE");
 
-        // --- 1. COUNTDOWN LOGIC (EST) ---
-        function getESTTime() {
-            return new Date(new Date().toLocaleString("en-US", {timeZone: "America/New_York"}));
-        }
+        // --- HARDCODED TARGET DATE (EST) ---
+        // Format: Year, Month (0-indexed, so 2 = March), Day, Hour, Minute, Second
+        // This is set to March 10, 2026 at 00:00:00 (Midnight) EST
+        const targetDateEST = new Date("March 10, 2026 00:00:00 GMT-0500").getTime();
 
-        const targetTime = getESTTime().getTime() + (12 * 60 * 60 * 1000);
-
-        function update() {
-            const now = getESTTime().getTime();
-            const diff = targetTime - now;
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetDateEST - now;
 
             if (diff <= 0) {
                 document.getElementById('timer').style.display = 'none';
-                document.getElementById('status').innerText = 'Phase 1 Complete';
+                document.getElementById('status').innerText = 'Information Available';
                 document.getElementById('discord-link').style.display = 'inline-block';
                 return;
             }
 
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
 
             document.getElementById('timer').innerText = 
                 `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        setInterval(update, 1000);
-        update();
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
 
-        // --- 2. PARTICLE ENGINE ---
+        // --- PARTICLE ENGINE ---
         const canvas = document.getElementById('pCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -161,9 +157,9 @@
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.speed = Math.random() * 0.4 + 0.1;
-                this.opacity = Math.random() * 0.4;
-                this.size = Math.random() * 1.2;
+                this.speed = Math.random() * 0.3 + 0.05;
+                this.opacity = Math.random() * 0.3;
+                this.size = Math.random() * 1.5;
             }
             draw() {
                 this.y -= this.speed;
@@ -175,7 +171,7 @@
             }
         }
 
-        for (let i = 0; i < 70; i++) particles.push(new Particle());
+        for (let i = 0; i < 60; i++) particles.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
