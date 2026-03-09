@@ -25,7 +25,6 @@
             overflow: hidden;
         }
 
-        /* Pulsing Gradient Background */
         .gradient-overlay {
             position: fixed;
             top: 0;
@@ -54,52 +53,50 @@
             text-align: center;
             z-index: 10;
             padding: 40px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         h1 {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 6px;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.4);
         }
 
         #timer {
-            font-size: clamp(3rem, 10vw, 6rem);
+            font-size: clamp(3.5rem, 12vw, 7rem);
             font-weight: 900;
-            letter-spacing: -2px;
+            letter-spacing: -3px;
             margin: 0;
             font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+            background: linear-gradient(to bottom, #fff 30%, #666 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         #discord-link {
             display: none;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: var(--discord-blue);
             text-decoration: none;
             font-weight: bold;
-            padding: 15px 30px;
-            border: 2px solid var(--discord-blue);
-            border-radius: 10px;
+            padding: 12px 24px;
+            margin-top: 20px;
+            border: 1px solid rgba(88, 101, 242, 0.4);
+            border-radius: 8px;
+            background: rgba(88, 101, 242, 0.05);
             transition: all 0.3s ease;
-            animation: slideUp 0.5s ease-out;
         }
 
         #discord-link:hover {
             background: var(--discord-blue);
             color: white;
-            box-shadow: 0 0 20px var(--discord-blue);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.5);
         }
     </style>
 </head>
@@ -109,27 +106,29 @@
     <canvas id="pCanvas"></canvas>
 
     <div class="content">
-        <h1 id="status">System Offline</h1>
+        <h1 id="status">Syncing with EST Terminal</h1>
         <div id="timer">12:00:00</div>
         <a href="https://discord.gg/badeye" id="discord-link">discord.gg/badeye</a>
     </div>
 
     <script>
-        // --- 1. COUNTDOWN LOGIC (Hardcoded to 12 Hours in EST) ---
+        // --- YOUR UNIQUE IDENTIFIER ---
+        console.log("RXo2SYKUCZE");
+
+        // --- 1. COUNTDOWN LOGIC (EST) ---
         function getESTTime() {
             return new Date(new Date().toLocaleString("en-US", {timeZone: "America/New_York"}));
         }
 
-        const startTime = getESTTime().getTime();
-        const endTime = startTime + (12 * 60 * 60 * 1000);
+        const targetTime = getESTTime().getTime() + (12 * 60 * 60 * 1000);
 
         function update() {
             const now = getESTTime().getTime();
-            const diff = endTime - now;
+            const diff = targetTime - now;
 
             if (diff <= 0) {
                 document.getElementById('timer').style.display = 'none';
-                document.getElementById('status').innerText = 'Connection Established';
+                document.getElementById('status').innerText = 'Phase 1 Complete';
                 document.getElementById('discord-link').style.display = 'inline-block';
                 return;
             }
@@ -145,7 +144,7 @@
         setInterval(update, 1000);
         update();
 
-        // --- 2. PARTICLES LOGIC ---
+        // --- 2. PARTICLE ENGINE ---
         const canvas = document.getElementById('pCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -154,20 +153,17 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-
         window.addEventListener('resize', resize);
         resize();
 
         class Particle {
-            constructor() {
-                this.init();
-            }
+            constructor() { this.init(); }
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.speed = Math.random() * 0.5 + 0.1;
-                this.opacity = Math.random() * 0.5 + 0.1;
-                this.size = Math.random() * 1.5;
+                this.speed = Math.random() * 0.4 + 0.1;
+                this.opacity = Math.random() * 0.4;
+                this.size = Math.random() * 1.2;
             }
             draw() {
                 this.y -= this.speed;
@@ -179,7 +175,7 @@
             }
         }
 
-        for (let i = 0; i < 80; i++) particles.push(new Particle());
+        for (let i = 0; i < 70; i++) particles.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
