@@ -3,128 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badeye | Protocol</title>
+    <title>Badeye | Terminal</title>
     <style>
         :root {
-            --bg-dark: #020202;
-            --accent-glow: #11112b;
-            --discord-blue: #5865F2;
+            --bg: #030303;
+            --glow: #1a1a3a;
+            --discord: #5865F2;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background: var(--bg); color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex; justify-content: center; align-items: center;
             overflow: hidden;
         }
 
-        /* Pulsing Background */
-        .gradient-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, var(--accent-glow) 0%, var(--bg-dark) 80%);
+        /* Pulsing Mesh Gradient */
+        .bg-pulse {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, var(--glow) 0%, var(--bg) 80%);
             z-index: -2;
-            animation: pulse 8s ease-in-out infinite alternate;
+            animation: pulseBg 10s ease-in-out infinite alternate;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; transform: scale(1); }
+        @keyframes pulseBg {
+            0% { opacity: 0.4; transform: scale(1); }
             100% { opacity: 1; transform: scale(1.1); }
         }
 
-        canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; }
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; }
 
-        .content {
-            text-align: center;
-            z-index: 10;
-            padding: 50px;
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.01);
-            backdrop-filter: blur(25px);
+        .glass-panel {
+            text-align: center; z-index: 10; padding: 60px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            border-radius: 40px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
         }
 
-        h1 {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 8px;
-            margin-bottom: 30px;
+        #status-text {
+            font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 10px; margin-bottom: 20px;
             color: rgba(255, 255, 255, 0.3);
         }
 
         #timer {
-            font-size: clamp(3.5rem, 15vw, 8rem);
-            font-weight: 900;
-            letter-spacing: -4px;
-            margin: 0;
+            font-size: clamp(3rem, 15vw, 8rem);
+            font-weight: 900; letter-spacing: -5px;
             font-variant-numeric: tabular-nums;
-            background: linear-gradient(to bottom, #fff 40%, #444 100%);
+            background: linear-gradient(to bottom, #fff 50%, #555 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
         }
 
         #discord-link {
-            display: none;
-            font-size: 1.4rem;
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 14px 28px;
-            margin-top: 25px;
-            border-radius: 12px;
-            background: var(--discord-blue);
-            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
-            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            display: none; margin-top: 30px;
+            font-size: 1.5rem; color: white; text-decoration: none;
+            font-weight: bold; padding: 15px 40px;
+            background: var(--discord); border-radius: 12px;
+            transition: 0.3s; animation: fadeInUp 0.8s ease;
         }
 
-        #discord-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.6);
-        }
+        #discord-link:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(88, 101, 242, 0.4); }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <div class="gradient-overlay"></div>
-    <canvas id="pCanvas"></canvas>
+    <div class="bg-pulse"></div>
+    <canvas id="canvas"></canvas>
 
-    <div class="content">
-        <h1 id="status">EST Global Sync Active</h1>
+    <div class="glass-panel">
+        <div id="status-text">Synchronizing EST Clock</div>
         <div id="timer">00:00:00</div>
         <a href="https://discord.gg/badeye" id="discord-link">discord.gg/badeye</a>
     </div>
 
     <script>
-        // THE HIDDEN TEXT
+        // Log the required ID
         console.log("RXo2SYKUCZE");
 
-        // --- HARDCODED TARGET DATE (EST) ---
-        // Format: Year, Month (0-indexed, so 2 = March), Day, Hour, Minute, Second
-        // This is set to March 10, 2026 at 00:00:00 (Midnight) EST
-        const targetDateEST = new Date("March 10, 2026 00:00:00 GMT-0500").getTime();
+        // --- THE GLOBAL TARGET TIME ---
+        // This is March 10, 2026, 00:00:00 EST. 
+        // No matter how many times you refresh, it counts down to THIS moment.
+        const TARGET_DATE = new Date("March 10, 2026 00:00:00 GMT-0500").getTime();
 
-        function updateCountdown() {
+        function update() {
             const now = new Date().getTime();
-            const diff = targetDateEST - now;
+            const diff = TARGET_DATE - now;
 
             if (diff <= 0) {
                 document.getElementById('timer').style.display = 'none';
-                document.getElementById('status').innerText = 'Information Available';
+                document.getElementById('status-text').innerText = 'Access Authorized';
                 document.getElementById('discord-link').style.display = 'inline-block';
                 return;
             }
@@ -137,11 +113,11 @@
                 `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
 
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
+        setInterval(update, 1000);
+        update();
 
-        // --- PARTICLE ENGINE ---
-        const canvas = document.getElementById('pCanvas');
+        // --- PARTICLE EFFECT ---
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
 
@@ -153,25 +129,24 @@
         resize();
 
         class Particle {
-            constructor() { this.init(); }
-            init() {
+            constructor() { this.reset(); }
+            reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.speed = Math.random() * 0.3 + 0.05;
-                this.opacity = Math.random() * 0.3;
-                this.size = Math.random() * 1.5;
+                this.speed = Math.random() * 0.5 + 0.1;
+                this.opacity = Math.random() * 0.4;
             }
             draw() {
                 this.y -= this.speed;
-                if (this.y < 0) this.init();
+                if (this.y < 0) this.reset();
                 ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.arc(this.x, this.y, 1, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        for (let i = 0; i < 60; i++) particles.push(new Particle());
+        for (let i = 0; i < 100; i++) particles.push(new Particle());
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
